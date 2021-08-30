@@ -61,14 +61,14 @@ public class CountryPicker: UIPickerView, UIPickerViewDelegate, UIPickerViewData
     open var currentCountry: Country? = nil
     
     //Converted to set since no 2 country codes should be same
-    @objc public var displayOnlyCountriesWithCodes: Set<String>? {
+    @objc public var displayOnlyCountriesWithCodes: Array<String>? {
         didSet {
             //Updating country list with `display only codes`
             setupCountry()
         }
     }
     //Converted to set since no 2 country codes should be same
-    @objc public var exeptCountriesWithCodes: Set<String>? {
+    @objc public var exeptCountriesWithCodes: Array<String>? {
         didSet {
             //Updating country list with `except countries codes`
             setupCountry()
@@ -308,14 +308,23 @@ private extension CountryPicker {
             return filteredCodes.contains(country.code ?? "")
         }
         countries = Array(filteredCountries)
-        
         //Sorting countries based on name
         sortCountries()
     }
     
     func sortCountries() {
-        countries.sort { country1, country2 in
-            (country1.name ?? "") < (country2.name ?? "")
+        if let display = displayOnlyCountriesWithCodes {
+            let countriesToDisplay: [Country] = display.compactMap { code in
+                let countryWithCode = countries.filter { country in
+                    return country.code == code
+                }
+                return countryWithCode.first
+            }
+            countries = countriesToDisplay
+        } else {
+            countries.sort { country1, country2 in
+                (country1.name ?? "") < (country2.name ?? "")
+            }
         }
     }
 }
